@@ -29,7 +29,7 @@ import { TaskService } from './core/common/schedule/task.service';
     CacheModule.register({
       store: redisStore,
       host: 'localhost',
-      port: process.env.REDIS_PORT,
+      port: +process.env.REDIS_PORT,
       auth_pass: process.env.REDIS_PASSWORD,
     }),
     ScheduleModule.forRoot(),

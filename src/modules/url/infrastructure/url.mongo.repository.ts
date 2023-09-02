@@ -11,4 +11,6 @@ export class UrlMongoRepository implements IUrlRepository {
   }
 
   incrementVisitCount(urlModel: Url) {}
+
+  clearExpiredUrls() {}
 }

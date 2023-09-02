@@ -6,9 +6,10 @@ import { Cache } from 'cache-manager';
 import sequelize, { Op } from 'sequelize';
 import { ConfigService } from '@nestjs/config';
 import { ConfigEnvType } from '../../../core/common/config/env.config';
+import { IUrlRepository } from './interface/url-repository.interface';
 
 @Injectable()
-export class UrlRepository {
+export class UrlRepository implements IUrlRepository {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectModel(Url)
@@ -40,7 +41,7 @@ export class UrlRepository {
   async incrementVisitCount(urlModel: Url) {
     await this.urlModel.update(
       {
-        visitCount: sequelize.literal('"visitCount" + 1'),
+        visitCount: sequelize.literal('"visit_count" + 1'),
       },
       {
         where: {

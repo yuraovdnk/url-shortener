@@ -1,16 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
-import {
-  ErrorExceptionFilter,
-  HttpExceptionFilter,
-} from '../src/core/common/exception/exception.filter';
-import { mapValidationErrors } from '../src/core/common/exception/errors-mapper';
 import { TestsService } from './test.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { setupApp } from '../src/main';
 
+jest.setTimeout(20000);
 describe('URL Controller (e2e)', () => {
   let app: INestApplication;
   let testService: TestsService;
@@ -28,14 +25,7 @@ describe('URL Controller (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({
-        stopAtFirstError: true,
-        transform: true,
-        exceptionFactory: mapValidationErrors,
-      }),
-    );
-    app.useGlobalFilters(new ErrorExceptionFilter(), new HttpExceptionFilter());
+    setupApp(app);
     cacheManager = moduleFixture.get<Cache>(CACHE_MANAGER);
     testService = app.get(TestsService);
 
@@ -69,9 +59,9 @@ describe('URL Controller (e2e)', () => {
           url: fakeUrl,
         })
         .expect(HttpStatus.TOO_MANY_REQUESTS);
-      //wait for reset ttl for next tests
+      //waiting for TTL reset for the next tests
       await new Promise((resolve) => setTimeout(resolve, 10000));
-    }, 15000);
+    });
   });
 
   describe('shorten url', () => {
@@ -112,7 +102,7 @@ describe('URL Controller (e2e)', () => {
       });
       const shortUrl = getShortUlr(response.body.redirectUrl);
 
-      //making request three times to original url
+      //making request 3 times to original url
       await request(app.getHttpServer())
         .get(`/${shortUrl}`)
         .expect(HttpStatus.FOUND);

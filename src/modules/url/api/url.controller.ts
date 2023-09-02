@@ -23,6 +23,7 @@ export class UrlController {
   @Get('stats/:url')
   async stats(@Param('url') shortUrl: string) {
     const urlModel = await this.urlService.getStats(shortUrl);
+
     return new StatsViewModel(urlModel);
   }
 
