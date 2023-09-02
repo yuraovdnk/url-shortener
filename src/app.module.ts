@@ -28,14 +28,14 @@ import { TaskService } from './core/common/schedule/task.service';
     }),
     CacheModule.register({
       store: redisStore,
-      host: 'localhost',
+      host: 'postgres',
       port: +process.env.REDIS_PORT,
       auth_pass: process.env.REDIS_PASSWORD,
     }),
     ScheduleModule.forRoot(),
     SequelizeModule.forRoot({
       dialect: 'postgres',
-      host: 'localhost',
+      host: 'postgres',
       port: +process.env.POSTGRES_PORT,
       username: process.env.POSTGRES_USERNAME,
       password: String(process.env.POSTGRES_PASSWORD),
