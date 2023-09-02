@@ -28,7 +28,7 @@ import { TaskService } from './core/common/schedule/task.service';
     }),
     CacheModule.register({
       store: redisStore,
-      host: 'postgres',
+      host: 'redis',
       port: +process.env.REDIS_PORT,
       auth_pass: process.env.REDIS_PASSWORD,
     }),
