@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ShortenUrlDto } from '../dtos/shorten-url.dto';
 import { UrlRepository } from '../../infrastructure/url.repository';
-import { Url } from '../../domain/entity/url.model';
+import { Url } from '../../domain/models/url.model';
 import { add } from 'date-fns';
 import { ConfigService } from '@nestjs/config';
 import { ConfigEnvType } from '../../../../core/common/config/env.config';
@@ -14,7 +14,7 @@ export class UrlService {
     private configService: ConfigService<ConfigEnvType, true>,
   ) {}
 
-  async shortenUrl(shortenUrlDto: ShortenUrlDto) {
+  async shortenUrl(shortenUrlDto: ShortenUrlDto): Promise<Url> {
     const envSettings = this.configService.get('settings', { infer: true });
 
     const createModelDto = {
@@ -26,21 +26,30 @@ export class UrlService {
     };
 
     const urlModel = Url.initCreate(createModelDto);
+
     await this.urlRepo.save(urlModel);
-    return urlModel.shortUrl;
+
+    return urlModel;
   }
 
   async findByShortUrl(url: string): Promise<string> {
     const urlModel = await this.urlRepo.findByShortUrl(url);
-    if (!url) {
+
+    if (!urlModel) {
+      console.warn('ulr model not found');
       throw new NotFoundException();
     }
 
-    await this.urlRepo.incrementCount(urlModel);
+    await this.urlRepo.incrementVisitCount(urlModel);
     return urlModel.longUrl;
   }
 
-  // getStats(id: number) {
-  //   return this.urlRepo.findById(id);
-  // }
+  async getStats(url: string) {
+    const urlModel = await this.urlRepo.getStats(url);
+    if (!urlModel) {
+      console.warn('ulr model not found');
+      throw new NotFoundException();
+    }
+    return urlModel;
+  }
 }

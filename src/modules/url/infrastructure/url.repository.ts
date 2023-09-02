@@ -1,40 +1,46 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Url } from '../domain/entity/url.model';
+import { Url } from '../domain/models/url.model';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import sequelize, { Op } from 'sequelize';
+import { ConfigService } from '@nestjs/config';
+import { ConfigEnvType } from '../../../core/common/config/env.config';
+
 @Injectable()
 export class UrlRepository {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectModel(Url)
     private urlModel: typeof Url,
+    private configService: ConfigService<ConfigEnvType, true>,
   ) {}
 
   async save(urlModel: Url) {
     await urlModel.save();
   }
 
-  async findByShortUrl(url: string) {
-    let cache = await this.cacheManager.get<Url>(url);
-    if (!cache) {
-      cache = await this.urlModel.findOne({
+  async findByShortUrl(url: string): Promise<Url | null> {
+    let urlModel: Url;
+    urlModel = await this.cacheManager.get<Url>(url);
+    if (!urlModel) {
+      urlModel = await this.urlModel.findOne({
         where: {
           shortUrl: url,
         },
       });
 
-      if (!cache) return null;
-      await this.cacheManager.set(url, cache, 0);
+      if (!urlModel) return null;
+      const ttl = this.configService.get('settings', { infer: true }).redisTtl;
+      await this.cacheManager.set(url, urlModel, +ttl);
     }
-
-    return cache;
+    return urlModel;
   }
 
-  async incrementCount(urlModel: Url) {
+  async incrementVisitCount(urlModel: Url) {
     await this.urlModel.update(
       {
-        visitCount: urlModel.visitCount + 1,
+        visitCount: sequelize.literal('"visitCount" + 1'),
       },
       {
         where: {
@@ -44,10 +50,20 @@ export class UrlRepository {
     );
   }
 
-  findById(id: number) {
-    return this.urlModel.findOne({
+  async getStats(url: string): Promise<Url> {
+    return await this.urlModel.findOne({
       where: {
-        id,
+        shortUrl: url,
+      },
+    });
+  }
+
+  async clearExpiredUrls() {
+    await this.urlModel.destroy({
+      where: {
+        expiresAt: {
+          [Op.lt]: new Date(),
+        },
       },
     });
   }

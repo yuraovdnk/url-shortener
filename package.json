@@ -18,7 +18,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand --forceExit",
     "docker-up": "docker-compose up"
   },
   "dependencies": {
@@ -35,7 +35,7 @@
     "@types/date-fns": "^2.6.0",
     "@types/sequelize": "^4.28.15",
     "cache-manager": "^5.2.3",
-    "cache-manager-redis-store": "2",
+    "cache-manager-redis-store": "2.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "date-fns": "^2.30.0",

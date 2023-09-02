@@ -1,9 +1,8 @@
 import { Column, Model, Table } from 'sequelize-typescript';
 import { DataTypes } from 'sequelize';
-import { nanoid } from 'nanoid';
 import * as process from 'process';
 
-@Table({ tableName: 'urls' })
+@Table({ tableName: 'urls', underscored: true })
 export class Url extends Model {
   @Column({ primaryKey: true, autoIncrement: true, allowNull: false })
   id: number;
