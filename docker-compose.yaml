@@ -32,6 +32,9 @@ services:
       - redis
     ports:
       - ${PORT:-3000}:3000
+    environment:
+      REDIS_HOST: redis
+      POSTRGRES_HOST: postgres
     networks:
       - tree
 
