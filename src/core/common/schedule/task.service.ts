@@ -1,13 +1,13 @@
 import { Cron } from '@nestjs/schedule';
-import { UrlRepository } from '../../../modules/url/infrastructure/url.repository';
 import { Injectable } from '@nestjs/common';
+import { IUrlRepository } from '../../../modules/url/infrastructure/interface/url-repository.interface';
 
 @Injectable()
 export class TaskService {
-  constructor(public urlRepo: UrlRepository) {}
+  constructor(private urlRepository: IUrlRepository) {}
 
   @Cron('0 1 * * *')
   async handleCron() {
-    await this.urlRepo.clearExpiredUrls();
+    await this.urlRepository.clearExpiredUrls();
   }
 }

@@ -14,6 +14,8 @@ import * as redisStore from 'cache-manager-redis-store';
 import * as process from 'process';
 import { TestsService } from '../test/test.service';
 import { TaskService } from './core/common/schedule/task.service';
+import { ProxyUrlRepository } from './modules/url/infrastructure/proxy-url.repository';
+import { IUrlRepository } from './modules/url/infrastructure/interface/url-repository.interface';
 
 @Module({
   imports: [
@@ -35,7 +37,7 @@ import { TaskService } from './core/common/schedule/task.service';
     ScheduleModule.forRoot(),
     SequelizeModule.forRoot({
       dialect: 'postgres',
-      host: process.env.POSTRGRES_HOST,
+      host: process.env.POSTGRES_HOST,
       port: +process.env.POSTGRES_PORT,
       username: process.env.POSTGRES_USERNAME,
       password: String(process.env.POSTGRES_PASSWORD),
@@ -49,6 +51,8 @@ import { TaskService } from './core/common/schedule/task.service';
   providers: [
     TaskService,
     TestsService,
+    ProxyUrlRepository,
+    { provide: IUrlRepository, useClass: UrlRepository },
     UrlService,
     UrlRepository,
     {

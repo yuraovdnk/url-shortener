@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ShortenUrlDto } from '../dtos/shorten-url.dto';
-import { UrlRepository } from '../../infrastructure/url.repository';
 import { Url } from '../../domain/models/url.model';
 import { add } from 'date-fns';
 import { ConfigService } from '@nestjs/config';
 import { ConfigEnvType } from '../../../../core/common/config/env.config';
 import { nanoid } from 'nanoid';
+import { ProxyUrlRepository } from '../../infrastructure/proxy-url.repository';
 
 @Injectable()
 export class UrlService {
   constructor(
-    private urlRepo: UrlRepository,
+    private proxyUrlRepository: ProxyUrlRepository,
     private configService: ConfigService<ConfigEnvType, true>,
   ) {}
 
@@ -27,25 +27,25 @@ export class UrlService {
 
     const urlModel = Url.initCreate(createModelDto);
 
-    await this.urlRepo.save(urlModel);
+    await this.proxyUrlRepository.save(urlModel);
 
     return urlModel;
   }
 
   async findByShortUrl(url: string): Promise<string> {
-    const urlModel = await this.urlRepo.findByShortUrl(url);
+    const urlModel = await this.proxyUrlRepository.findByShortUrl(url);
 
     if (!urlModel) {
       console.warn('ulr model not found');
       throw new NotFoundException();
     }
 
-    await this.urlRepo.incrementVisitCount(urlModel);
+    await this.proxyUrlRepository.incrementVisitCount(urlModel);
     return urlModel.longUrl;
   }
 
   async getStats(url: string) {
-    const urlModel = await this.urlRepo.getStats(url);
+    const urlModel = await this.proxyUrlRepository.getStats(url);
     if (!urlModel) {
       console.warn('ulr model not found');
       throw new NotFoundException();
